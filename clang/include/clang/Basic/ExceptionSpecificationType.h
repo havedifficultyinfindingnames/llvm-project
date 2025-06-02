@@ -27,6 +27,11 @@ enum ExceptionSpecificationType {
   EST_DependentNoexcept,///< noexcept(expression), value-dependent
   EST_NoexceptFalse,    ///< noexcept(expression), evals to 'false'
   EST_NoexceptTrue,     ///< noexcept(expression), evals to 'true'
+  EST_BasicThrows,      ///< throws
+  EST_DependentThrows,  ///< throws(expression), value-dependent
+  EST_ThrowsFalse,      ///< throws(expression), evals to 'false' or 'no_except'
+  EST_ThrowsTrue,       ///< throws(expression), evals to 'true' or 'static_except'
+  EST_ThrowsDynamic,    ///< throws(expression), evals to 'dynamic_except'
   EST_Unevaluated,      ///< not evaluated yet, for special member function
   EST_Uninstantiated,   ///< not instantiated yet
   EST_Unparsed          ///< not parsed yet

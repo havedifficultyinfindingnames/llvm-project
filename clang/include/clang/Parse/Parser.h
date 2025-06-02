@@ -2098,6 +2098,14 @@ private:
                     ExprResult &NoexceptExpr,
                     CachedTokens *&ExceptionSpecTokens);
 
+
+  ExceptionSpecificationType ParseStaticExceptionSpecification(SourceRange &SpecificationRange,
+                                                              ExprResult &StaticExceptionExpr);
+
+  // 
+  ExceptionSpecificationType ParseNoexceptSpecification(SourceRange &SpecificationRange,
+                                                        ExprResult &NoexceptExpr);
+
   // EndLoc is filled with the location of the last token of the specification.
   ExceptionSpecificationType ParseDynamicExceptionSpecification(
                                   SourceRange &SpecificationRange,
