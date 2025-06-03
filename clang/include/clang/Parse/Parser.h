@@ -2099,8 +2099,8 @@ private:
                     CachedTokens *&ExceptionSpecTokens);
 
 
-  ExceptionSpecificationType ParseStaticExceptionSpecification(SourceRange &SpecificationRange,
-                                                              ExprResult &StaticExceptionExpr);
+  ExceptionSpecificationType ParseThrowsSpecification(SourceRange &SpecificationRange,
+                                                      ExprResult &StaticExceptionExpr);
 
   // 
   ExceptionSpecificationType ParseNoexceptSpecification(SourceRange &SpecificationRange,

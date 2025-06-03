@@ -828,6 +828,7 @@ enum class CCEKind {
   ArrayBound,    ///< Array bound in array declarator or new-expression.
   ExplicitBool,  ///< Condition in an explicit(bool) specifier.
   Noexcept,      ///< Condition in a noexcept(bool) specifier.
+  Throws,        ///< Condition in a noexcept(except_t) specifier.
   StaticAssertMessageSize, ///< Call to size() in a static assert
                            ///< message.
   StaticAssertMessageData, ///< Call to data() in a static assert
@@ -6518,6 +6519,11 @@ public:
   /// the appropriate ExceptionSpecificationType.
   ExprResult ActOnNoexceptSpec(Expr *NoexceptExpr,
                                ExceptionSpecificationType &EST);
+
+  /// Check the given throws-specifier, convert its expression, and compute
+  /// the appropriate ExceptionSpecificationType.
+  ExprResult ActOnThrowsSpec(Expr *ThrowsExpr,
+                              ExceptionSpecificationType &EST);
 
   CanThrowResult canThrow(const Stmt *E);
   /// Determine whether the callee of a particular function call can throw.

@@ -4312,10 +4312,8 @@ ExceptionSpecificationType Parser::tryParseExceptionSpecification(
   if (Tok.is(tok::kw_noexcept)) {
     Diag(Tok, diag::warn_cxx98_compat_noexcept_decl);
     SourceRange NoexceptRange;
-    ExceptionSpecificationType NoexceptType =
-        ParseNoexceptSpecification(NoexceptRange, NoexceptExpr);
+    Result = ParseNoexceptSpecification(NoexceptRange, NoexceptExpr);
     SpecificationRange = NoexceptRange;
-    Result = NoexceptType;
 
     // If there's a dynamic specification after a noexcept specification,
     // parse that and ignore the results.
@@ -4327,8 +4325,9 @@ ExceptionSpecificationType Parser::tryParseExceptionSpecification(
     return Result;
   }
   if (Tok.is(tok::kw_throws)) {
-    // FIXME: Result =
-
+    ExprResult StaticExceptionExpr;
+    Result = ParseThrowsSpecification(SpecificationRange,
+                                      StaticExceptionExpr);
   }
   return Result;
 }
@@ -4346,7 +4345,7 @@ static void diagnoseDynamicExceptionSpecification(Parser &P, SourceRange Range,
   }
 }
 
-/// ParseStaticExceptionSpecification - Parse a C++
+/// ParseThrowsSpecification - Parse a C++
 /// throws-specification.
 ///
 ///       throws-specification:
@@ -4354,7 +4353,7 @@ static void diagnoseDynamicExceptionSpecification(Parser &P, SourceRange Range,
 ///         'throws' '(' expression ')'
 ///
 ///
-ExceptionSpecificationType Parser::ParseStaticExceptionSpecification(
+ExceptionSpecificationType Parser::ParseThrowsSpecification(
     SourceRange &SpecificationRange,
     ExprResult &StaticExceptionExpr) {
   assert(Tok.is(tok::kw_throws) && "expected throws");
@@ -4374,7 +4373,7 @@ ExceptionSpecificationType Parser::ParseStaticExceptionSpecification(
     T.consumeClose();
     if (!StaticExceptionExpr.isInvalid()) {
       StaticExceptionExpr =
-          Actions.ActOnNoexceptSpec(StaticExceptionExpr.get(), Result);
+          Actions.ActOnThrowsSpec(StaticExceptionExpr.get(), Result);
       SpecificationRange = SourceRange(KeywordLoc, T.getCloseLocation());
     } else {
       Result = EST_BasicThrows;
