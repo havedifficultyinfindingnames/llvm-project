@@ -5219,6 +5219,9 @@ public:
     /// Noexcept expression, if this is a computed noexcept specification.
     Expr *NoexceptExpr = nullptr;
 
+    /// Noexcept expression, if this is a computed noexcept specification.
+    Expr *ThrowsExpr = nullptr;
+
     /// The function whose exception specification this is, for
     /// EST_Unevaluated and EST_Uninstantiated.
     FunctionDecl *SourceDecl = nullptr;

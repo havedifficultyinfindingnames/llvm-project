@@ -5437,7 +5437,7 @@ public:
                                    ExceptionSpecificationType EST,
                                    ArrayRef<ParsedType> DynamicExceptions,
                                    ArrayRef<SourceRange> DynamicExceptionRanges,
-                                   Expr *NoexceptExpr,
+                                   Expr *NoexceptExpr, Expr *ThrowsExpr, 
                                    SmallVectorImpl<QualType> &Exceptions,
                                    FunctionProtoType::ExceptionSpecInfo &ESI);
 
@@ -5447,7 +5447,7 @@ public:
   void actOnDelayedExceptionSpecification(
       Decl *D, ExceptionSpecificationType EST, SourceRange SpecificationRange,
       ArrayRef<ParsedType> DynamicExceptions,
-      ArrayRef<SourceRange> DynamicExceptionRanges, Expr *NoexceptExpr);
+      ArrayRef<SourceRange> DynamicExceptionRanges, Expr *NoexceptExpr, Expr *ThrowsExpr);
 
   class InheritedConstructorInfo;
 

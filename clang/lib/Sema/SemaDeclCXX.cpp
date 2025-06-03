@@ -19439,7 +19439,7 @@ void Sema::checkExceptionSpecification(
     bool IsTopLevel, ExceptionSpecificationType EST,
     ArrayRef<ParsedType> DynamicExceptions,
     ArrayRef<SourceRange> DynamicExceptionRanges, Expr *NoexceptExpr,
-    SmallVectorImpl<QualType> &Exceptions,
+    Expr *ThrowsExpr, SmallVectorImpl<QualType> &Exceptions,
     FunctionProtoType::ExceptionSpecInfo &ESI) {
   Exceptions.clear();
   ESI.Type = EST;
@@ -19482,12 +19482,27 @@ void Sema::checkExceptionSpecification(
     ESI.NoexceptExpr = NoexceptExpr;
     return;
   }
+
+  if (isComputedThrows(EST)) {
+    assert((ThrowsExpr->isTypeDependent() ||
+            ThrowsExpr->getType()->getCanonicalTypeUnqualified() ==
+            Context.IntTy) &&
+           "Parser should have made sure that the expression is int");
+    if (IsTopLevel && DiagnoseUnexpandedParameterPack(ThrowsExpr)) {
+      ESI.Type = EST_BasicThrows;
+      return;
+    }
+
+    ESI.ThrowsExpr = ThrowsExpr;
+    return;
+  }
 }
 
 void Sema::actOnDelayedExceptionSpecification(
     Decl *D, ExceptionSpecificationType EST, SourceRange SpecificationRange,
     ArrayRef<ParsedType> DynamicExceptions,
-    ArrayRef<SourceRange> DynamicExceptionRanges, Expr *NoexceptExpr) {
+    ArrayRef<SourceRange> DynamicExceptionRanges
+    , Expr *NoexceptExpr, Expr *ThrowsExpr) {
   if (!D)
     return;
 
@@ -19503,7 +19518,7 @@ void Sema::actOnDelayedExceptionSpecification(
   llvm::SmallVector<QualType, 4> Exceptions;
   FunctionProtoType::ExceptionSpecInfo ESI;
   checkExceptionSpecification(/*IsTopLevel=*/true, EST, DynamicExceptions,
-                              DynamicExceptionRanges, NoexceptExpr, Exceptions,
+                              DynamicExceptionRanges, NoexceptExpr, ThrowsExpr, Exceptions,
                               ESI);
 
   // Update the exception specification on the function type.

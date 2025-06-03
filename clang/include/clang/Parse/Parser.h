@@ -2096,6 +2096,7 @@ private:
                     SmallVectorImpl<ParsedType> &DynamicExceptions,
                     SmallVectorImpl<SourceRange> &DynamicExceptionRanges,
                     ExprResult &NoexceptExpr,
+                    ExprResult &ThrowsExpr,
                     CachedTokens *&ExceptionSpecTokens);
 
 

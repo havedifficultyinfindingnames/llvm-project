@@ -7674,6 +7674,7 @@ void Parser::ParseFunctionDeclarator(Declarator &D,
   SmallVector<ParsedType, 2> DynamicExceptions;
   SmallVector<SourceRange, 2> DynamicExceptionRanges;
   ExprResult NoexceptExpr;
+  ExprResult ThrowsExpr;
   CachedTokens *ExceptionSpecTokens = nullptr;
   ParsedAttributes FnAttrs(AttrFactory);
   TypeResult TrailingReturnType;
@@ -7780,6 +7781,7 @@ void Parser::ParseFunctionDeclarator(Declarator &D,
                                                  DynamicExceptions,
                                                  DynamicExceptionRanges,
                                                  NoexceptExpr,
+                                                 ThrowsExpr,
                                                  ExceptionSpecTokens);
       if (ESpecType != EST_None)
         EndLoc = ESpecRange.getEnd();
@@ -7838,6 +7840,7 @@ void Parser::ParseFunctionDeclarator(Declarator &D,
                     ESpecType, ESpecRange, DynamicExceptions.data(),
                     DynamicExceptionRanges.data(), DynamicExceptions.size(),
                     NoexceptExpr.isUsable() ? NoexceptExpr.get() : nullptr,
+                    ThrowsExpr.isUsable() ? ThrowsExpr.get() : nullptr,
                     ExceptionSpecTokens, DeclsInPrototype, StartLoc,
                     LocalEndLoc, D, TrailingReturnType, TrailingReturnTypeLoc,
                     &DS),

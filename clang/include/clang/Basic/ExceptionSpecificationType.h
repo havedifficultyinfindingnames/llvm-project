@@ -51,6 +51,14 @@ inline bool isNoexceptExceptionSpec(ExceptionSpecificationType ESpecType) {
          isComputedNoexcept(ESpecType);
 }
 
+inline bool isComputedThrows(ExceptionSpecificationType ESpecType) {
+  return ESpecType >= EST_DependentThrows && ESpecType <= EST_ThrowsDynamic;
+}
+
+inline bool isThrowsExceptionSpec(ExceptionSpecificationType ESpecType) {
+  return ESpecType == EST_BasicThrows || isComputedThrows(ESpecType);
+}
+
 inline bool isUnresolvedExceptionSpec(ExceptionSpecificationType ESpecType) {
   return ESpecType == EST_Unevaluated || ESpecType == EST_Uninstantiated;
 }

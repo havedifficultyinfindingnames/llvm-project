@@ -4228,7 +4228,7 @@ ExceptionSpecificationType Parser::tryParseExceptionSpecification(
     bool Delayed, SourceRange &SpecificationRange,
     SmallVectorImpl<ParsedType> &DynamicExceptions,
     SmallVectorImpl<SourceRange> &DynamicExceptionRanges,
-    ExprResult &NoexceptExpr, CachedTokens *&ExceptionSpecTokens) {
+    ExprResult &NoexceptExpr, ExprResult &ThrowsExpr, CachedTokens *&ExceptionSpecTokens) {
   ExceptionSpecificationType Result = EST_None;
   ExceptionSpecTokens = nullptr;
 
@@ -4325,9 +4325,8 @@ ExceptionSpecificationType Parser::tryParseExceptionSpecification(
     return Result;
   }
   if (Tok.is(tok::kw_throws)) {
-    ExprResult StaticExceptionExpr;
     Result = ParseThrowsSpecification(SpecificationRange,
-                                      StaticExceptionExpr);
+                                      ThrowsExpr);
   }
   return Result;
 }
