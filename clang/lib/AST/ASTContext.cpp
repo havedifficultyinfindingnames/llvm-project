@@ -4897,6 +4897,11 @@ static bool isCanonicalExceptionSpecification(
     return AnyPackExpansions;
   }
 
+  if (ESI.Type == EST_BasicThrows)
+    return true;
+  if (ESI.Type == EST_DependentThrows)
+    return true;
+
   return false;
 }
 
@@ -4924,8 +4929,11 @@ QualType ASTContext::getFunctionTypeInternal(
     // noexcept expression, or we're just looking for a canonical type.
     // Otherwise, we're going to need to create a type
     // sugar node to hold the concrete expression.
-    if (OnlyWantCanonical || !isComputedNoexcept(EPI.ExceptionSpec.Type) ||
-        EPI.ExceptionSpec.NoexceptExpr == FPT->getNoexceptExpr())
+    if (OnlyWantCanonical 
+        || (!isComputedNoexcept(EPI.ExceptionSpec.Type) && !isComputedThrows(EPI.ExceptionSpec.Type)) 
+        || EPI.ExceptionSpec.NoexceptExpr == FPT->getNoexceptExpr() 
+        || EPI.ExceptionSpec.ThrowsExpr == FPT->getThrowsExpr()
+        )
       return Existing;
 
     // We need a new type sugar node for this one, to hold the new noexcept
@@ -4971,7 +4979,7 @@ QualType ASTContext::getFunctionTypeInternal(
         // We don't know yet. It shouldn't matter what we pick here; no-one
         // should ever look at this.
         [[fallthrough]];
-      case EST_None: case EST_MSAny: case EST_NoexceptFalse:
+      case EST_None: case EST_MSAny: case EST_NoexceptFalse: case EST_ThrowsDynamic:
         CanonicalEPI.ExceptionSpec.Type = EST_None;
         break;
 
@@ -4997,9 +5005,15 @@ QualType ASTContext::getFunctionTypeInternal(
       case EST_BasicNoexcept:
       case EST_NoexceptTrue:
       case EST_NoThrow:
+      case EST_ThrowsFalse:
         CanonicalEPI.ExceptionSpec.Type = EST_BasicNoexcept;
         break;
 
+      case EST_ThrowsTrue:
+      case EST_BasicThrows:
+        CanonicalEPI.ExceptionSpec.Type = EST_BasicThrows;
+
+      case EST_DependentThrows:
       case EST_DependentNoexcept:
         llvm_unreachable("dependent noexcept is already canonical");
       }

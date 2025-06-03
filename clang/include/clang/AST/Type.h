@@ -5363,6 +5363,7 @@ private:
     case EST_BasicNoexcept:
     case EST_Unparsed:
     case EST_NoThrow:
+    case EST_BasicThrows:
       return {0, 0, 0};
 
     case EST_Dynamic:
@@ -5371,6 +5372,10 @@ private:
     case EST_DependentNoexcept:
     case EST_NoexceptFalse:
     case EST_NoexceptTrue:
+    case EST_DependentThrows:
+    case EST_ThrowsFalse:
+    case EST_ThrowsTrue:
+    case EST_ThrowsDynamic:
       return {0, 1, 0};
 
     case EST_Uninstantiated:
@@ -5495,6 +5500,14 @@ public:
   /// if there is none (because the exception spec is not of this form).
   Expr *getNoexceptExpr() const {
     if (!isComputedNoexcept(getExceptionSpecType()))
+      return nullptr;
+    return *getTrailingObjects<Expr *>();
+  }
+
+  /// Return the expression inside throws(expression), or a null pointer
+  /// if there is none (because the exception spec is not of this form).
+  Expr *getThrowsExpr() const {
+    if (!isComputedThrows(getExceptionSpecType()))
       return nullptr;
     return *getTrailingObjects<Expr *>();
   }
