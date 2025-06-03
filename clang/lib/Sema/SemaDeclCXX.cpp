@@ -217,6 +217,7 @@ Sema::ImplicitExceptionSpecification::CalledDecl(SourceLocation CallLoc,
     ComputedEST = EST;
     return;
   case EST_NoexceptFalse:
+  case EST_ThrowsDynamic:
     ClearExceptions();
     ComputedEST = EST_None;
     return;
@@ -226,6 +227,11 @@ Sema::ImplicitExceptionSpecification::CalledDecl(SourceLocation CallLoc,
   case EST_BasicNoexcept:
   case EST_NoexceptTrue:
   case EST_NoThrow:
+  case EST_ThrowsFalse:
+    return;
+  // TODO: 
+  case EST_BasicThrows:
+  case EST_ThrowsTrue:
     return;
   // If we're still at noexcept(true) and there's a throw() callee,
   // change to that specification.
@@ -234,6 +240,7 @@ Sema::ImplicitExceptionSpecification::CalledDecl(SourceLocation CallLoc,
       ComputedEST = EST_DynamicNone;
     return;
   case EST_DependentNoexcept:
+  case EST_DependentThrows:
     llvm_unreachable(
         "should not generate implicit declarations for dependent cases");
   case EST_Dynamic:
@@ -19369,10 +19376,23 @@ bool Sema::checkThisInStaticMemberFunctionExceptionSpec(CXXMethodDecl *Method) {
   case EST_Uninstantiated:
   case EST_Unevaluated:
   case EST_BasicNoexcept:
+  case EST_BasicThrows:
   case EST_NoThrow:
   case EST_DynamicNone:
   case EST_MSAny:
   case EST_None:
+    break;
+
+  case EST_DependentThrows:
+  case EST_ThrowsFalse:
+  case EST_ThrowsTrue:
+  case EST_ThrowsDynamic:
+    if (!Finder.TraverseStmt(Proto->getThrowsExpr()))
+      return true;
+    for (const auto &E : Proto->exceptions()) {
+      if (!Finder.TraverseType(E))
+        return true;
+    }
     break;
 
   case EST_DependentNoexcept:

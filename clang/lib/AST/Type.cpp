@@ -3858,11 +3858,14 @@ CanThrowResult FunctionProtoType::canThrow() const {
   case EST_BasicNoexcept:
   case EST_NoexceptTrue:
   case EST_NoThrow:
+  case EST_ThrowsFalse:
     return CT_Cannot;
 
+  case EST_ThrowsDynamic:
   case EST_None:
   case EST_MSAny:
   case EST_NoexceptFalse:
+  case EST_ThrowsTrue: case EST_BasicThrows: // FIXME: should I add a new enumerator "CT_Throws"?
     return CT_Can;
 
   case EST_Dynamic:
@@ -3875,6 +3878,7 @@ CanThrowResult FunctionProtoType::canThrow() const {
 
   case EST_Uninstantiated:
   case EST_DependentNoexcept:
+  case EST_DependentThrows:
     return CT_Dependent;
   }
 

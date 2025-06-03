@@ -5012,6 +5012,7 @@ QualType ASTContext::getFunctionTypeInternal(
       case EST_ThrowsTrue:
       case EST_BasicThrows:
         CanonicalEPI.ExceptionSpec.Type = EST_BasicThrows;
+        break;
 
       case EST_DependentThrows:
       case EST_DependentNoexcept:
@@ -13779,8 +13780,16 @@ ASTContext::mergeExceptionSpecs(FunctionProtoType::ExceptionSpecInfo ESI1,
                                 bool AcceptDependent) {
   ExceptionSpecificationType EST1 = ESI1.Type, EST2 = ESI2.Type;
 
+  // If either of them can throw herbception, that is the result.
+  for (auto I : {EST_BasicThrows, EST_ThrowsTrue}) {
+    if (EST1 == I)
+      return ESI1;
+    if (EST2 == I)
+      return ESI2;
+  }
+
   // If either of them can throw anything, that is the result.
-  for (auto I : {EST_None, EST_MSAny, EST_NoexceptFalse}) {
+  for (auto I : {EST_None, EST_MSAny, EST_NoexceptFalse, EST_ThrowsDynamic}) {
     if (EST1 == I)
       return ESI1;
     if (EST2 == I)
@@ -13789,7 +13798,7 @@ ASTContext::mergeExceptionSpecs(FunctionProtoType::ExceptionSpecInfo ESI1,
 
   // If either of them is non-throwing, the result is the other.
   for (auto I :
-       {EST_NoThrow, EST_DynamicNone, EST_BasicNoexcept, EST_NoexceptTrue}) {
+       {EST_NoThrow, EST_DynamicNone, EST_BasicNoexcept, EST_NoexceptTrue, EST_ThrowsFalse}) {
     if (EST1 == I)
       return ESI2;
     if (EST2 == I)
@@ -13801,7 +13810,8 @@ ASTContext::mergeExceptionSpecs(FunctionProtoType::ExceptionSpecInfo ESI1,
   // since it's not actually part of the canonical type. And this should never
   // happen in C++17, because it would mean we were computing the composite
   // pointer type of dependent types, which should never happen.
-  if (EST1 == EST_DependentNoexcept || EST2 == EST_DependentNoexcept) {
+  if (EST1 == EST_DependentNoexcept || EST2 == EST_DependentNoexcept
+      || EST1 == EST_DependentThrows || EST2 == EST_DependentThrows) {
     assert(AcceptDependent &&
            "computing composite pointer type of dependent types");
     return FunctionProtoType::ExceptionSpecInfo();
@@ -13810,6 +13820,11 @@ ASTContext::mergeExceptionSpecs(FunctionProtoType::ExceptionSpecInfo ESI1,
   // Switch over the possibilities so that people adding new values know to
   // update this function.
   switch (EST1) {
+  case EST_BasicThrows:
+  case EST_ThrowsTrue:
+  case EST_ThrowsFalse:
+  case EST_ThrowsDynamic:
+  case EST_DependentThrows:
   case EST_None:
   case EST_DynamicNone:
   case EST_MSAny:
