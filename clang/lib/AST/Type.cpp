@@ -3749,6 +3749,19 @@ FunctionProtoType::FunctionProtoType(QualType result, ArrayRef<QualType> params,
         toTypeDependence(epi.ExceptionSpec.NoexceptExpr->getDependence()) &
         (TypeDependence::Instantiation | TypeDependence::UnexpandedPack));
   }
+  // Fill in the Expr * in the exception specification if present.
+  else if (isComputedThrows(getExceptionSpecType())) {
+    assert(epi.ExceptionSpec.ThrowsExpr && "computed throws with no expr");
+    assert((getExceptionSpecType() == EST_DependentThrows) ==
+           epi.ExceptionSpec.ThrowsExpr->isValueDependent());
+
+    // Store the noexcept expression and context.
+    *getTrailingObjects<Expr *>() = epi.ExceptionSpec.ThrowsExpr;
+
+    addDependence(
+        toTypeDependence(epi.ExceptionSpec.ThrowsExpr->getDependence()) &
+        (TypeDependence::Instantiation | TypeDependence::UnexpandedPack));
+  }
   // Fill in the FunctionDecl * in the exception specification if present.
   else if (getExceptionSpecType() == EST_Uninstantiated) {
     // Store the function decl from which we will resolve our
@@ -3769,7 +3782,8 @@ FunctionProtoType::FunctionProtoType(QualType result, ArrayRef<QualType> params,
   // then it's a dependent type. This only happens in C++17 onwards.
   if (isCanonicalUnqualified()) {
     if (getExceptionSpecType() == EST_Dynamic ||
-        getExceptionSpecType() == EST_DependentNoexcept) {
+        getExceptionSpecType() == EST_DependentNoexcept ||
+        getExceptionSpecType() == EST_DependentThrows) {
       assert(hasDependentExceptionSpec() && "type should not be canonical");
       addDependence(TypeDependence::DependentInstantiation);
     }

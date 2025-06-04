@@ -4372,7 +4372,7 @@ ExceptionSpecificationType Parser::ParseThrowsSpecification(
     T.consumeClose();
     if (!StaticExceptionExpr.isInvalid()) {
       StaticExceptionExpr =
-          Actions.ActOnThrowsSpec(StaticExceptionExpr.get(), Result);
+          Actions.ActOnThrowsSpec(T.getOpenLocation(), StaticExceptionExpr.get(), Result);
       SpecificationRange = SourceRange(KeywordLoc, T.getCloseLocation());
     } else {
       Result = EST_BasicThrows;

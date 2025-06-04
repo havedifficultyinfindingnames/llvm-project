@@ -6522,7 +6522,8 @@ public:
 
   /// Check the given throws-specifier, convert its expression, and compute
   /// the appropriate ExceptionSpecificationType.
-  ExprResult ActOnThrowsSpec(Expr *ThrowsExpr,
+  ExprResult ActOnThrowsSpec( SourceLocation ExpressionLoc,
+                              Expr *ThrowsExpr,
                               ExceptionSpecificationType &EST);
 
   CanThrowResult canThrow(const Stmt *E);

@@ -111,7 +111,8 @@ ExprResult Sema::ActOnNoexceptSpec(Expr *NoexceptExpr,
   return Converted;
 }
 
-ExprResult Sema::ActOnThrowsSpec(Expr *ThrowsExpr,
+ExprResult Sema::ActOnThrowsSpec(SourceLocation ExpressionLoc,
+                                 Expr *ThrowsExpr,
                                  ExceptionSpecificationType &EST) {
 
   if (ThrowsExpr->isTypeDependent() ||
@@ -127,6 +128,17 @@ ExprResult Sema::ActOnThrowsSpec(Expr *ThrowsExpr,
   if (Converted.isInvalid()) {
     EST = EST_ThrowsFalse;
     // Fill in an expression of 'false' as a fixup.
+    auto *IntExpr = new (Context) IntegerLiteral(
+        Context, llvm::APSInt::get(0), Context.IntTy, ThrowsExpr->getBeginLoc());
+    llvm::APSInt Value{2};
+    Value = 0;
+    return ConstantExpr::Create(Context, IntExpr, APValue{Value});
+  }
+  else if (Result < 0 || Result > 2)
+  {
+    EST = EST_ThrowsFalse;
+    Diag(ExpressionLoc,diag::err_throws_expression_value_out_of_range)
+           << Result;
     auto *IntExpr = new (Context) IntegerLiteral(
         Context, llvm::APSInt::get(0), Context.IntTy, ThrowsExpr->getBeginLoc());
     llvm::APSInt Value{2};
